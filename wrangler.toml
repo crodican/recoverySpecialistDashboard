@@ -1,0 +1,8 @@
+name = "recoveryspecialist-dashboard" # Your desired Worker name
+main = "worker.js"           # Points to your Worker's code
+compatibility_date = "2024-06-01" # Use a recent date (or current date)
+
+# This section tells Cloudflare where your static assets are
+[site]
+bucket = "./public" # Points to your frontend files
+# entry-point = "worker.js" # This line is often crucial for Workers serving assets, but might be implicit now

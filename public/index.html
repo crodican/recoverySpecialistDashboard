@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataTables with Bootstrap 5.3</title>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Keeping Inter font for consistency, but not relying on Tailwind */
+            background-color: #f8f9fa; /* Light gray background from Bootstrap utilities */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.5rem; /* Bootstrap's rounded-3 from utilities, or custom */
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Bootstrap shadow utility */
+            max-width: 90%;
+            width: 100%;
+        }
+        /* Custom styles for DataTables elements to ensure proper spacing/appearance with Bootstrap */
+        .dataTables_wrapper .dt-buttons {
+            margin-bottom: 1rem;
+        }
+        .dataTables_filter input {
+            border-radius: 0.25rem; /* Bootstrap's form-control border-radius */
+            border: 1px solid #dee2e6; /* Bootstrap's default border color */
+            padding: 0.375rem 0.75rem; /* Bootstrap's form-control padding */
+            margin-left: 0.5rem;
+        }
+        .dataTables_length select {
+            border-radius: 0.25rem;
+            border: 1px solid #dee2e6;
+            padding: 0.375rem 2.25rem 0.375rem 0.75rem; /* Adjust padding for Bootstrap select arrow */
+            margin-right: 0.5rem;
+            background-position: right 0.75rem center; /* Align select arrow */
+            background-size: 16px 12px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #0d6efd; /* Bootstrap primary blue */
+            color: white !important; /* !important to override DataTables default */
+            border-color: #0d6efd;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background-color: #0a58ca; /* Darker primary blue */
+            border-color: #0a58ca;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.disabled):not(.current) {
+            background-color: #e2e6ea; /* Light gray hover */
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        /* Styles for RowReorder drag handle */
+        table.dataTable.rowReorder tbody tr td:first-child {
+            cursor: grab;
+        }
+        /* Default DataTables Select styling might need a slight adjustment for Bootstrap's background */
+        table.dataTable tbody tr.selected {
+            background-color: #cfe2ff !important; /* Bootstrap's light blue for selected state */
+        }
+    </style>
+
+    <!-- DataTables CSS for Bootstrap 5 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.bootstrap5.min.css"/>
+    <!-- ColReorder CSS for Bootstrap 5 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/colreorder/2.0.0/css/colReorder.bootstrap5.min.css"/>
+    <!-- RowReorder CSS for Bootstrap 5 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/rowreorder/1.5.0/css/rowReorder.bootstrap5.min.css"/>
+    <!-- RowGroup CSS for Bootstrap 5 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/rowgroup/1.5.0/css/rowGroup.bootstrap5.min.css"/>
+    <!-- KeyTable CSS for Bootstrap 5 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/keytable/2.12.0/css/keyTable.bootstrap5.min.css"/>
+    <!-- Select CSS for Bootstrap 5 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/2.0.0/css/select.bootstrap5.min.css"/>
+
+    <!-- jQuery (DataTables dependency) -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Moment.js for date rendering -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    
+    <!-- Bootstrap 5.3 JS (Bundle includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- DataTables JS (MUST be loaded after jQuery and Bootstrap JS) -->
+    <script type="text/javascript" src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <!-- DataTables Bootstrap 5 Integration JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- DataTables moment.js plugin for date sorting (MUST be loaded after moment.js and dataTables.min.js) -->
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.13.4/sorting/datetime-moment.js"></script>
+
+    <!-- DataTables Buttons JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
+    <!-- DataTables Buttons Bootstrap 5 Integration JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.bootstrap5.min.js"></script>
+
+    <!-- JSZip for Excel export -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- pdfmake for PDF export -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+    <!-- Buttons HTML5 (Excel, PDF) -->
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+
+    <!-- Buttons Print -->
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+
+    <!-- Buttons ColVis (for Copy, often used with other visibility options) -->
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.colVis.min.js"></script>
+
+    <!-- ColReorder JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/colreorder/2.0.0/js/dataTables.colReorder.min.js"></script>
+    <!-- RowReorder JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.5.0/js/dataTables.rowReorder.min.js"></script>
+    <!-- RowGroup JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.min.js"></script>
+    <!-- KeyTable JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/keytable/2.12.0/js/dataTables.keyTable.min.js"></script>
+    <!-- Select JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/select/2.0.0/js/dataTables.select.min.js"></script>
+
+
+    <script type="text/javascript">
+        // Set Moment.js format for DataTables date sorting
+        $.fn.dataTable.moment('YYYY/MM/DD');
+
+        $(document).ready(function() {
+            $('#example').DataTable({
+                // Enable DataTables processing indicator
+                processing: true,
+                // Enable server-side processing (if you were fetching data dynamically)
+                serverSide: false,
+                // Define the columns for the table
+                columns: [
+                    { data: 'NAME' },
+                    { data: 'CITY' },
+                    { data: 'COUNTY' },
+                    { data: 'CREDENTIAL'},
+                    { data: 'NUMBER'},
+                    {
+                        data: 'ISSUE DATE',
+                        render: function (data, type, row) {
+                            if (type === 'display' || type === 'filter') {
+                                return moment(data).format('MMMM Do, YYYY');
+                            }
+                            return data;
+                        }
+                    },
+                    {
+                        data: 'EXP DATE',
+                        render: function (data, type, row) {
+                            if (type === 'display' || type === 'filter') {
+                                return moment(data).format('MMMM Do, YYYY');
+                            }
+                            return data;
+                        }
+                    },
+                    { data: 'STATUS' },
+                    { data: 'COUNTY' }
+                ],
+                data: [
+                  {"NAME": "(Jaclyn) Jackie Zukoski", "CITY": "minersville", "CREDENTIAL": "CRS", "NUMBER": "19035", "ISSUE DATE": "45160", "EXP DATE": "45891", "STATUS": "Active", "COUNTY": "Schuylkill"},
+                  {"NAME": "Aaron Hutson", "CITY": "reading", "CREDENTIAL": "CRS", "NUMBER": "22097", "ISSUE DATE": "45812", "EXP DATE": "46542", "STATUS": "Active", "COUNTY": "Berks"},
+                  {"NAME": "Aaron Prager", "CITY": "reading", "CREDENTIAL": "CRS", "NUMBER": "11685", "ISSUE DATE": "43269", "EXP DATE": "44000", "STATUS": "Expired", "COUNTY": "Berks"},
+                  {"NAME": "Abigail Di Sanzo", "CITY": "lancaster", "CREDENTIAL": "CRS", "NUMBER": "16166", "ISSUE DATE": "44293", "EXP DATE": "45023", "STATUS": "Expired", "COUNTY": "Lancaster"}, 
+                  {"NAME": "Adam Birch", "CITY": "crumlynne", "CREDENTIAL": "CRS", "NUMBER": "17516", "ISSUE DATE": "44714", "EXP DATE": "46175", "STATUS": "Active", "COUNTY": "Delaware"},
+                  {"NAME": "Adam Sledd", "CITY": "downingtown", "CREDENTIAL": "CRS", "NUMBER": "9144", "ISSUE DATE": "42083", "EXP DATE": "46466", "STATUS": "Active", "COUNTY": "Chester"},
+                  {"NAME": "Adam Sledd", "CITY": "downingtown", "CREDENTIAL": "CFRS", "NUMBER": "9144", "ISSUE DATE": "43479", "EXP DATE": "46466", "STATUS": "Active", "COUNTY": "Chester"},
+                  {"NAME": "Adam Sledd", "CITY": "downingtown", "CREDENTIAL": "CRSS", "NUMBER": "9144", "ISSUE DATE": "44254", "EXP DATE": "46445", "STATUS": "Active", "COUNTY": "Chester"}
+                ],
+                // Add the Buttons extension
+                dom: 'Bfrtip', // B: Buttons, f: filtering input, r: processing display, t: the table, i: information, p: pagination
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'pdfHtml5',
+                    'print',
+                    'colvis'
+                ],
+                // Enable ColReorder
+                colReorder: true,
+                // Enable RowReorder
+                rowReorder: true,
+                // Enable RowGroup, grouping by 'office' column
+                rowGroup: {
+                    dataSrc: 'COUNTY'
+                },
+                // Enable KeyTable for keyboard navigation
+                keys: true,
+                // Enable Select for row selection
+                select: true,
+                // Use Bootstrap 5 renderer for DataTables styling
+                renderer: 'bootstrap'
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Recovery Specialist Data</h1>
+
+        <table id="example" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>NAME</th>
+                    <th>CITY</th>
+                    <th>CREDENTIAL</th>
+                    <th>NUMBER</th>
+                    <th>ISSUE DATE</th>
+                    <th>EXP DATE</th>
+                    <th>STATUS</th>
+                    <th>COUNTY</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be populated by DataTables from the 'data' option in JS -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>NAME</th>
+                    <th>CITY</th>
+                    <th>CREDENTIAL</th>
+                    <th>NUMBER</th>
+                    <th>ISSUE DATE</th>
+                    <th>EXP DATE</th>
+                    <th>STATUS</th>
+                    <th>COUNTY</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</body>
+</html>
